@@ -54,7 +54,7 @@ export default function UserDashboard() {
               <ActiveInvestments user={user} />
               
               {/* Market Chart - Full Width */}
-              <div className="w-full h-110 sm:h-96 md:h-[500px]">
+              <div className="w-full h-140 sm:h-96 md:h-[500px]">
                 <ErrorBoundary>
                   <MarketChart />
                 </ErrorBoundary>
