@@ -45,32 +45,32 @@ export default function Deposit({ onClose }: DepositProps) {
           </div>
         )}
 
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
           <button
             onClick={() => setShowMessage(true)}
-            className="bg-gray-700/50 border border-gray-600 rounded-lg p-6 text-center opacity-50 cursor-not-allowed"
+            className="bg-gray-700/50 border border-gray-600 rounded-lg p-4 sm:p-6 text-center opacity-50 cursor-not-allowed min-h-[140px] sm:min-h-auto flex flex-col items-center justify-center"
           >
-            <span className="text-4xl mb-3 block">💳</span>
-            <span className="text-gray-400 font-semibold block">Debit/Credit Card</span>
-            <span className="text-gray-500 text-sm mt-2">Currently unavailable</span>
+            <span className="text-3xl sm:text-4xl mb-2 sm:mb-3 block">💳</span>
+            <span className="text-gray-400 font-semibold block text-sm sm:text-base">Debit/Credit Card</span>
+            <span className="text-gray-500 text-xs sm:text-sm mt-2">Currently unavailable</span>
           </button>
 
           <button
             onClick={() => setMethod('transfer')}
-            className="bg-green-500/20 hover:bg-green-500/40 border border-green-500 rounded-lg p-6 text-center transition-colors"
+            className="bg-green-500/20 hover:bg-green-500/40 border border-green-500 rounded-lg p-4 sm:p-6 text-center transition-colors min-h-[140px] sm:min-h-auto flex flex-col items-center justify-center"
           >
-            <span className="text-4xl mb-3 block">🏦</span>
-            <span className="text-white font-semibold block">Bank Transfer</span>
-            <span className="text-gray-400 text-sm mt-2">Transfer via bank</span>
+            <span className="text-3xl sm:text-4xl mb-2 sm:mb-3 block">🏦</span>
+            <span className="text-white font-semibold block text-sm sm:text-base">Bank Transfer</span>
+            <span className="text-gray-400 text-xs sm:text-sm mt-2">Transfer via bank</span>
           </button>
 
           <button
             onClick={() => setMethod('crypto')}
-            className="bg-purple-500/20 hover:bg-purple-500/40 border border-purple-500 rounded-lg p-6 text-center transition-colors"
+            className="bg-purple-500/20 hover:bg-purple-500/40 border border-purple-500 rounded-lg p-4 sm:p-6 text-center transition-colors min-h-[140px] sm:min-h-auto flex flex-col items-center justify-center"
           >
-            <span className="text-4xl mb-3 block">₿</span>
-            <span className="text-white font-semibold block">Cryptocurrency</span>
-            <span className="text-gray-400 text-sm mt-2">Send crypto</span>
+            <span className="text-3xl sm:text-4xl mb-2 sm:mb-3 block">₿</span>
+            <span className="text-white font-semibold block text-sm sm:text-base">Cryptocurrency</span>
+            <span className="text-gray-400 text-xs sm:text-sm mt-2">Send crypto</span>
           </button>
         </div>
       </div>

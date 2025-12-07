@@ -44,7 +44,7 @@ export default function Sidebar({ activeView, onTrading, onSupport, onBalance, o
         {/* Mobile Hamburger */}
         <button
           onClick={() => setIsOpen(!isOpen)}
-          className="hidden md:hidden fixed top-4 left-4 z-50 p-2 bg-gray-900 text-white rounded-lg"
+          className="md:hidden fixed top-4 left-4 z-50 p-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors"
         >
           {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
         </button>
@@ -63,27 +63,28 @@ export default function Sidebar({ activeView, onTrading, onSupport, onBalance, o
           bg-gray-900 w-64 min-h-screen p-4
           transition-transform duration-300 ease-in-out
           ${isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
+          border-r border-gray-800
         `}>
           <nav className="space-y-2 mt-16 md:mt-0">
             <button
               onClick={() => handleMenuClick(onUsers)}
-              className="w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors bg-blue-500 text-white"
+              className="w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors bg-blue-500 text-white hover:bg-blue-600 font-medium"
             >
-              <Users className="h-5 w-5" />
+              <Users className="h-5 w-5 flex-shrink-0" />
               <span>Users</span>
             </button>
             <button
               onClick={() => handleMenuClick(onSupport)}
               className="w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors text-gray-300 hover:bg-gray-800 hover:text-white"
             >
-              <MessageSquare className="h-5 w-5" />
+              <MessageSquare className="h-5 w-5 flex-shrink-0" />
               <span>Support</span>
             </button>
             <button
               onClick={() => handleMenuClick(onSettings)}
               className="w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors text-gray-300 hover:bg-gray-800 hover:text-white"
             >
-              <Settings className="h-5 w-5" />
+              <Settings className="h-5 w-5 flex-shrink-0" />
               <span>Settings</span>
             </button>
           </nav>
@@ -98,7 +99,7 @@ export default function Sidebar({ activeView, onTrading, onSupport, onBalance, o
       {/* Mobile Hamburger */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="md:hidden fixed top-4 left-4 z-50 p-2 bg-gray-900 text-white rounded-lg"
+        className="md:hidden fixed top-4 left-4 z-50 p-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors"
       >
         {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
       </button>
@@ -117,44 +118,45 @@ export default function Sidebar({ activeView, onTrading, onSupport, onBalance, o
         bg-gray-900 w-64 min-h-screen p-4
         transition-transform duration-300 ease-in-out
         ${isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
+        border-r border-gray-800
       `}>
-        <nav className="space-y-2 mt-16 md:mt-0">
+        <nav className="space-y-1 mt-16 md:mt-0">
           <button
             onClick={() => handleMenuClick(onTrading)}
             className={`
-              w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors
+              w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors font-medium
               ${activeView === 'trading'
-                ? 'bg-blue-500 text-white'
+                ? 'bg-blue-500 text-white hover:bg-blue-600'
                 : 'text-gray-300 hover:bg-gray-800 hover:text-white'}
             `}
           >
-            <BarChart2 className="h-5 w-5" />
+            <BarChart2 className="h-5 w-5 flex-shrink-0" />
             <span>Trading</span>
           </button>
           
           <button
             onClick={() => handleMenuClick(onSupport)}
             className={`
-              w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors
+              w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors font-medium
               ${activeView === 'support'
-                ? 'bg-blue-500 text-white'
+                ? 'bg-blue-500 text-white hover:bg-blue-600'
                 : 'text-gray-300 hover:bg-gray-800 hover:text-white'}
             `}
           >
-            <MessageSquare className="h-5 w-5" />
+            <MessageSquare className="h-5 w-5 flex-shrink-0" />
             <span>Support</span>
           </button>
           
           <button
             onClick={() => handleMenuClick(onBalance)}
             className={`
-              w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors
+              w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors font-medium
               ${activeView === 'balance'
-                ? 'bg-blue-500 text-white'
+                ? 'bg-blue-500 text-white hover:bg-blue-600'
                 : 'text-gray-300 hover:bg-gray-800 hover:text-white'}
             `}
           >
-            <Wallet className="h-5 w-5" />
+            <Wallet className="h-5 w-5 flex-shrink-0" />
             <span>Balance</span>
           </button>
 
@@ -163,52 +165,52 @@ export default function Sidebar({ activeView, onTrading, onSupport, onBalance, o
           <button
             onClick={() => handleMenuClick(onDeposit)}
             className={`
-              w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors
+              w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors font-medium
               ${activeView === 'deposit'
-                ? 'bg-green-500 text-white'
+                ? 'bg-green-500 text-white hover:bg-green-600'
                 : 'text-gray-300 hover:bg-gray-800 hover:text-white'}
             `}
           >
-            <span className="text-xl">💰</span>
+            <span className="text-lg flex-shrink-0">💰</span>
             <span>Deposit</span>
           </button>
 
           <button
             onClick={() => handleMenuClick(onWithdraw)}
             className={`
-              w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors
+              w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors font-medium
               ${activeView === 'withdraw'
-                ? 'bg-red-500 text-white'
+                ? 'bg-red-500 text-white hover:bg-red-600'
                 : 'text-gray-300 hover:bg-gray-800 hover:text-white'}
             `}
           >
-            <span className="text-xl">📤</span>
+            <span className="text-lg flex-shrink-0">📤</span>
             <span>Withdraw</span>
           </button>
 
           <button
             onClick={() => handleMenuClick(onInvestment)}
             className={`
-              w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors
+              w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors font-medium
               ${activeView === 'investment'
-                ? 'bg-purple-500 text-white'
+                ? 'bg-purple-500 text-white hover:bg-purple-600'
                 : 'text-gray-300 hover:bg-gray-800 hover:text-white'}
             `}
           >
-            <TrendingUp className="h-5 w-5" />
+            <TrendingUp className="h-5 w-5 flex-shrink-0" />
             <span>Investment Plans</span>
           </button>
 
           <button
             onClick={() => handleMenuClick(onHistory)}
             className={`
-              w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors
+              w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors font-medium
               ${activeView === 'history'
-                ? 'bg-blue-500 text-white'
+                ? 'bg-blue-500 text-white hover:bg-blue-600'
                 : 'text-gray-300 hover:bg-gray-800 hover:text-white'}
             `}
           >
-            <BarChart2 className="h-5 w-5" />
+            <BarChart2 className="h-5 w-5 flex-shrink-0" />
             <span>Transaction History</span>
           </button>
         </nav>

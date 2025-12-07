@@ -90,7 +90,7 @@ export default function Contact() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900">
       {/* Navigation */}
-      <nav className="container mx-auto px-6 py-6 flex justify-between items-center">
+      <nav className="container py-6 flex justify-between items-center">
         <Link to="/" className="flex items-center space-x-2">
           <div className="bg-gradient-to-r from-blue-500 to-cyan-500 p-2 rounded-lg">
             <TrendingUp className="h-8 w-8 text-white" />
@@ -101,7 +101,7 @@ export default function Contact() {
         </Link>
       </nav>
 
-      <main className="container mx-auto px-6 py-16">
+      <main className="container py-16">
         {/* Hero Section */}
         <div className="text-center mb-20">
           <h1 className="text-6xl md:text-7xl font-bold text-white mb-8 leading-tight">
@@ -278,7 +278,7 @@ export default function Contact() {
 
       {/* Footer */}
       <footer className="border-t border-slate-700/50 bg-slate-800/30 backdrop-blur-sm mt-20">
-        <div className="container mx-auto px-6 py-12">
+        <div className="container py-12">
           <div className="text-center text-slate-400">
             <p>&copy; 2024 TradePro. All rights reserved. Trading involves risk and may not be suitable for all investors.</p>
           </div>
