@@ -1,12 +1,8 @@
 import { useEffect, useState } from 'react';
 import { X, AlertCircle } from 'lucide-react';
-import { createClient } from '@supabase/supabase-js';
+import { supabase } from '../../services/auth';
 import InvestmentPlan from './InvestmentPlan';
 import type { User } from '../../types';
-
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
-const supabase = createClient(supabaseUrl || '', supabaseAnonKey || '');
 
 interface DepositNotificationProps {
   user: User;

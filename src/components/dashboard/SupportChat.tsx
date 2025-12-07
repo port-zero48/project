@@ -3,11 +3,7 @@ import { Send, HelpCircle, Paperclip, X, Loader, Trash2 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { Message, FileAttachment } from '../../types';
 import { fetchSupportMessages, sendMessage, uploadFile, createFileAttachment, subscribeToMessages, deleteMessage, markMessagesRead } from '../../services/chat';
-import { createClient } from '@supabase/supabase-js';
-
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
-const supabase = createClient(supabaseUrl || '', supabaseAnonKey || '');
+import { supabase } from '../../services/auth';
 
 export default function SupportChat() {
   const { user } = useAuth();
@@ -311,178 +307,97 @@ export default function SupportChat() {
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      if (file.size > 5 * 1024 * 1024) { // 5MB limit
-        setError('File size must be less than 5MB');
+      if (file.size > 5 * 1024 * 1024) {
+        setMessage({ type: 'error', text: 'File size must be less than 5MB' });
         return;
       }
       setSelectedFile(file);
-      setError(null);
+      setMessage(null);
     }
   };
 
-  if (!user) return null;
-
-  // Calculate unread messages count (messages from admin/support)
-  const unreadCount = messages.filter(msg => msg.senderId !== user.id && !msg.isRead).length;
-
   return (
-    <div className="bg-gray-800 rounded-xl p-6 h-[500px] flex flex-col">
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center space-x-2">
-          <HelpCircle className="h-6 w-6 text-blue-500" />
-          <h3 className="text-lg font-semibold text-white">Support Chat</h3>
-          {unreadCount > 0 && (
-            <span className="bg-red-500 text-white text-xs font-bold px-2.5 py-1 rounded-full animate-pulse">
-              {unreadCount}
-            </span>
-          )}
-        </div>
-      </div>
-      
-      {error && (
-        <div className="bg-red-500/10 border border-red-500 text-red-400 px-3 py-2 rounded-lg text-sm mb-2">
-          {error}
-        </div>
-      )}
-      
-      <div className="flex-1 overflow-y-auto space-y-4 mb-4">
-        {loading ? (
-          <div className="flex items-center justify-center h-full">
-            <Loader className="h-6 w-6 text-blue-500 animate-spin" />
+    <div className="flex flex-col h-full">
+      <div className="flex-1 overflow-y-auto p-4">
+        {loading && <div className="text-center py-4"><Loader /></div>}
+        
+        {!loading && messages.length === 0 && (
+          <div className="text-center py-4 text-gray-500">
+            No messages yet. Ask us anything!
           </div>
-        ) : messages.length === 0 ? (
-          <div className="flex items-center justify-center h-full text-gray-400">
-            No messages yet. Start the conversation!
-          </div>
-        ) : (
-          messages.map((msg) => {
-            return (
-              <div
-                key={msg.id}
-                className={`flex items-start space-x-3 ${msg.senderId === user.id ? 'flex-row-reverse space-x-reverse' : ''}`}
-              >
-                <div className={`rounded-lg px-4 py-2 max-w-[70%] ${msg.senderId === user.id ? 'bg-blue-500 text-white' : 'bg-green-500 text-white'}`}>
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="font-semibold text-sm">{msg.senderId === user.id ? 'You' : 'Support'}</span>
-                    <span className="text-xs opacity-75">{msg.timestamp instanceof Date ? msg.timestamp.toLocaleTimeString() : new Date(msg.timestamp as any).toLocaleTimeString()}</span>
+        )}
+        
+        <div className="space-y-4">
+          {messages.map((msg) => (
+            <div key={msg.id} className={`flex ${msg.senderId === user?.id ? 'justify-end' : 'justify-start'}`}>
+              <div className={`max-w-xs rounded-lg p-3 ${msg.senderId === user?.id ? 'bg-blue-500 text-white' : 'bg-gray-100'}`}>
+                {msg.content && <div className="text-sm">{msg.content}</div>}
+                
+                {msg.attachments && msg.attachments.length > 0 && (
+                  <div className="mt-2">
+                    {msg.attachments.map(att => (
+                      <div key={att.id} className="flex items-center">
+                        <Paperclip className="w-4 h-4 mr-2" />
+                        <a href={att.fileUrl} target="_blank" rel="noopener noreferrer" className="text-sm text-blue-500 hover:underline">
+                          {att.fileName}
+                        </a>
+                      </div>
+                    ))}
                   </div>
-
-                  <p>{msg.content}</p>
-
-                  {/* File attachments with inline preview for images */}
-                  {msg.attachments && msg.attachments.length > 0 && (
-                    <div className="mt-2 space-y-2 border-t border-opacity-30 border-current pt-2">
-                      {msg.attachments.map((att: FileAttachment) => {
-                        const isImage = att.fileType.startsWith('image/');
-                        return (
-                          <div key={att.id}>
-                            {isImage ? (
-                              <a
-                                href={att.fileUrl}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="block hover:opacity-80 transition-opacity"
-                              >
-                                <img
-                                  src={att.fileUrl}
-                                  alt={att.fileName}
-                                  className="max-w-[200px] max-h-[200px] rounded-lg cursor-pointer"
-                                  title={`${att.fileName} (${(att.fileSize / 1024).toFixed(1)}KB)`}
-                                />
-                              </a>
-                            ) : (
-                              <a
-                                href={att.fileUrl}
-                                download={att.fileName}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="flex items-center space-x-2 text-xs hover:underline opacity-90 hover:opacity-100 transition-opacity"
-                                title={`Download ${att.fileName} (${(att.fileSize / 1024).toFixed(1)}KB)`}
-                              >
-                                <span>📎</span>
-                                <span>{att.fileName}</span>
-                                <span className="opacity-75">({(att.fileSize / 1024).toFixed(1)}KB)</span>
-                              </a>
-                            )}
-                          </div>
-                        );
-                      })}
-                    </div>
-                  )}
-
-                  <div className="mt-2 text-xs text-slate-300 flex items-center space-x-2 justify-between">
-                    <div className="flex items-center space-x-2">
-                      {msg.senderId === user.id && (
-                        <span className={`font-bold transition-colors ${msg.isRead ? 'text-blue-400' : 'text-gray-500'}`}>
-                          {msg.isRead ? '✓✓' : '✓'}
-                        </span>
-                      )}
-                    </div>
-                    {msg.senderId === user.id && (
-                      <button
-                        onClick={() => handleDeleteMessage(msg.id)}
-                        className="text-gray-400 hover:text-red-400 transition-colors"
-                        title="Delete message"
-                      >
-                        <Trash2 className="h-3 w-3" />
-                      </button>
-                    )}
-                  </div>
+                )}
+                
+                <div className="flex items-center justify-between text-xs text-gray-400 mt-2">
+                  <span>{msg.senderId === user?.id ? 'You' : 'Support'}</span>
+                  <span>{msg.timestamp.toLocaleString()}</span>
                 </div>
               </div>
-            );
-          })
-        )}
+            </div>
+          ))}
+        </div>
+        
         <div ref={messagesEndRef} />
       </div>
-
-      <form onSubmit={handleSendMessage} className="space-y-3">
-        {selectedFile && (
-          <div className="flex items-center justify-between bg-gray-700 rounded-lg px-3 py-2">
-            <span className="text-sm text-gray-300">📎 {selectedFile.name}</span>
-            <button
-              type="button"
-              onClick={() => setSelectedFile(null)}
-              className="text-gray-400 hover:text-white"
-            >
-              <X className="h-4 w-4" />
-            </button>
-          </div>
-        )}
-        <div className="flex space-x-3">
-          <input
+      
+      <div className="bg-white p-4 border-t">
+        <form onSubmit={handleSendMessage} className="flex">
+          <input 
             type="text"
             value={message}
             onChange={(e) => setMessage(e.target.value)}
             placeholder="Type your message..."
-            disabled={uploading}
-            className="flex-1 bg-gray-700 text-white rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
+            className="flex-1 p-2 border rounded-l-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
-          <button
-            type="button"
-            onClick={() => fileInputRef.current?.click()}
-            disabled={uploading}
-            className="bg-gray-700 text-white rounded-lg px-4 py-2 hover:bg-gray-600 transition-colors disabled:opacity-50"
-            title="Attach file"
-          >
-            <Paperclip className="h-5 w-5" />
-          </button>
-          <input
-            ref={fileInputRef}
+          
+          <input 
             type="file"
+            ref={fileInputRef}
             onChange={handleFileSelect}
-            accept="image/*,.pdf,.doc,.docx,.txt"
             className="hidden"
           />
-          <button
-            type="submit"
-            disabled={(!message.trim() && !selectedFile) || uploading}
-            className="bg-blue-500 text-white rounded-lg px-4 py-2 hover:bg-blue-600 transition-colors disabled:opacity-50"
+          
+          <button 
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            className="flex items-center justify-center p-2 bg-gray-100 rounded-lg hover:bg-gray-200 transition"
           >
-            {uploading ? <Loader className="h-5 w-5 animate-spin" /> : <Send className="h-5 w-5" />}
+            <Paperclip className="w-4 h-4 text-gray-500" />
           </button>
-        </div>
-      </form>
+          
+          <button 
+            type="submit"
+            disabled={uploading}
+            className="ml-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition disabled:bg-blue-300"
+          >
+            {uploading ? <Loader className="w-4 h-4 animate-spin" /> : 'Send'}
+          </button>
+        </form>
+        
+        {error && (
+          <div className="mt-2 text-red-500 text-sm">
+            {error}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

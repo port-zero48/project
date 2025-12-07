@@ -1,15 +1,7 @@
 import { useState, useEffect } from 'react';
 import { User } from '../../types';
 import { Ban, Check, X, Save, CreditCard as Edit2, Search, Filter, Download, UserPlus, AlertTriangle, Lock, Shield } from 'lucide-react';
-import { createClient } from '@supabase/supabase-js';
-
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
-
-const supabase = createClient(
-  supabaseUrl || '',
-  supabaseAnonKey || '',
-);
+import { supabase } from '../../services/auth';
 
 export default function UserManagement() {
   const [users, setUsers] = useState<User[]>([]);

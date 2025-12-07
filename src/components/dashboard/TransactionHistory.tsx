@@ -2,11 +2,7 @@ import { useState, useEffect } from 'react';
 import { ArrowDownLeft, ArrowUpRight, Clock, CheckCircle, XCircle, AlertCircle, RefreshCw } from 'lucide-react';
 import { fetchTransactionHistory } from '../../services/transactions';
 import { useAuth } from '../../context/AuthContext';
-import { createClient } from '@supabase/supabase-js';
-
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
-const supabase = createClient(supabaseUrl || '', supabaseAnonKey || '');
+import { supabase } from '../../services/auth';
 
 interface Transaction {
   id: string;

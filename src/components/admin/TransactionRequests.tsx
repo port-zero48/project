@@ -1,11 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Check, X, Download, Trash2 } from 'lucide-react';
-import { createClient } from '@supabase/supabase-js';
+import { supabase } from '../../services/auth';
 import { completeDeposit, rejectDeposit, deleteDepositRequest } from '../../services/transactions';
-
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
-const supabase = createClient(supabaseUrl || '', supabaseAnonKey || '');
 
 interface TransactionRequest {
   id: string;

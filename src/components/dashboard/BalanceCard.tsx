@@ -2,16 +2,11 @@ import { Wallet, TrendingUp } from 'lucide-react';
 import { User } from '../../types';
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { createClient } from '@supabase/supabase-js';
-
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
-const supabase = createClient(supabaseUrl || '', supabaseAnonKey || '');
+import { supabase } from '../../services/auth';
 
 interface BalanceCardProps {
   user: User;
 }
-
 export default function BalanceCard({ user }: BalanceCardProps) {
   const { user: authUser } = useAuth();
   const [balances, setBalances] = useState({

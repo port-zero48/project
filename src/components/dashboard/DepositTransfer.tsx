@@ -1,12 +1,8 @@
 import { useState, useRef, useEffect } from 'react';
 import { Upload } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
-import { createClient } from '@supabase/supabase-js';
+import { supabase } from '../../services/auth';
 import { createTransferDepositRequest, getWithdrawalMethodByType } from '../../services/transactions';
-
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
-const supabase = createClient(supabaseUrl || '', supabaseAnonKey || '');
 
 interface BankDetails {
   bank_name: string;

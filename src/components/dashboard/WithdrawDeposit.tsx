@@ -1,11 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Upload, CheckCircle, DollarSign } from 'lucide-react';
 import { User } from '../../types';
-import { createClient } from '@supabase/supabase-js';
-
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
-const supabase = createClient(supabaseUrl || '', supabaseAnonKey || '');
+import { supabase } from '../../services/auth';
 
 interface WithdrawalState {
   step: 'fee' | 'withdraw' | 'success';
