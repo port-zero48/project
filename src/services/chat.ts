@@ -1,13 +1,7 @@
-import { createClient } from '@supabase/supabase-js';
+ 
+import { supabase } from './auth';
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
-
-const supabase = createClient(
-  supabaseUrl || '',
-  supabaseAnonKey || '',
-);
-
+ 
 // Fetch support messages for current user (excluding their own messages if admin)
 export const fetchSupportMessages = async () => {
   try {

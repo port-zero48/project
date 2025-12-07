@@ -18,35 +18,13 @@ export default function Landing() {
   // Fetch real market data like in TradingChart.tsx
   const fetchStockData = async (ticker: string) => {
     try {
-      // Add timeout and proper error handling
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 5000);
-
+      // Call our Edge Function instead of direct API
       const response = await fetch(
-        `https://api.allorigins.win/raw?url=${encodeURIComponent(
-          `https://query1.finance.yahoo.com/v8/finance/chart/${ticker}?interval=1d&range=1d`
-        )}`,
-        { signal: controller.signal }
+        `https://ukizjreylybyidbazgas.supabase.co/functions/v1/market-data?symbol=${ticker}`
       );
 
-      clearTimeout(timeoutId);
-
       if (!response.ok) throw new Error('Failed to fetch');
-
-      const data = await response.json();
-      const quote = data.chart.result[0];
-      const meta = quote.meta;
-      const currentPrice = meta.regularMarketPrice;
-      const previousClose = meta.chartPreviousClose;
-      const change = currentPrice - previousClose;
-      const changePercent = ((change / previousClose) * 100).toFixed(2);
-
-      return {
-        symbol: ticker,
-        price: parseFloat(currentPrice.toFixed(2)),
-        change: parseFloat(change.toFixed(2)),
-        changePercent: parseFloat(changePercent),
-      };
+      return await response.json();
     } catch (err) {
       console.error(`Error fetching ${ticker}:`, err);
       // Return mock data as fallback
