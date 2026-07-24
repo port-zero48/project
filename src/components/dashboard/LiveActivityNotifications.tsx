@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ArrowUpRight, Sparkles, TrendingUp, Wallet } from 'lucide-react';
 
 type ActivityType = 'invested' | 'withdrawn' | 'deposited' | 'earned';
@@ -11,38 +11,72 @@ interface ActivityItem {
   detail: string;
 }
 
-const ACTIVITY_FEED: ActivityItem[] = [
-  { id: '1', name: 'John Cliff', type: 'invested', amount: 3000, detail: 'just invested' },
-  { id: '2', name: 'Maya Chen', type: 'withdrawn', amount: 2000, detail: 'just withdrew profit' },
-  { id: '3', name: 'Ava Brooks', type: 'invested', amount: 4800, detail: 'just invested' },
-  { id: '4', name: 'Daniel Ross', type: 'earned', amount: 950, detail: 'just earned profit' },
-  { id: '5', name: 'Liam Stone', type: 'deposited', amount: 1250, detail: 'just deposited funds' },
-  { id: '6', name: 'Sophia Lane', type: 'withdrawn', amount: 1600, detail: 'just withdrew profit' },
-  { id: '7', name: 'Noah Price', type: 'invested', amount: 7200, detail: 'just invested' },
-  { id: '8', name: 'Emma Ford', type: 'earned', amount: 1100, detail: 'just earned profit' },
-  { id: '9', name: 'Olivia Reed', type: 'deposited', amount: 2200, detail: 'just deposited funds' },
-  { id: '10', name: 'Mason Cole', type: 'invested', amount: 5400, detail: 'just invested' },
-  { id: '11', name: 'Isabella King', type: 'withdrawn', amount: 3000, detail: 'just withdrew profit' },
-  { id: '12', name: 'Ethan Cruz', type: 'earned', amount: 1350, detail: 'just earned profit' },
-  { id: '13', name: 'Charlotte Bell', type: 'deposited', amount: 1850, detail: 'just deposited funds' },
-  { id: '14', name: 'James Walker', type: 'invested', amount: 8900, detail: 'just invested' },
-  { id: '15', name: 'Amelia Scott', type: 'withdrawn', amount: 4100, detail: 'just withdrew profit' },
-  { id: '16', name: 'Ben Carter', type: 'invested', amount: 6100, detail: 'just invested' },
-  { id: '17', name: 'Grace Turner', type: 'earned', amount: 1420, detail: 'just earned profit' },
-  { id: '18', name: 'Lucas Brooks', type: 'deposited', amount: 2650, detail: 'just deposited funds' },
-  { id: '19', name: 'Nora Hughes', type: 'invested', amount: 7500, detail: 'just invested' },
-  { id: '20', name: 'Owen Parker', type: 'withdrawn', amount: 3600, detail: 'just withdrew profit' },
-  { id: '21', name: 'Zara Mitchell', type: 'earned', amount: 1280, detail: 'just earned profit' },
-  { id: '22', name: 'Caleb Foster', type: 'deposited', amount: 3100, detail: 'just deposited funds' },
-  { id: '23', name: 'Hannah Reed', type: 'invested', amount: 9200, detail: 'just invested' },
-  { id: '24', name: 'Leo Adams', type: 'withdrawn', amount: 4300, detail: 'just withdrew profit' },
-  { id: '25', name: 'Ivy Collins', type: 'earned', amount: 1540, detail: 'just earned profit' },
-  { id: '26', name: 'Nathan Brooks', type: 'deposited', amount: 3400, detail: 'just deposited funds' },
-  { id: '27', name: 'Sophie Bennett', type: 'invested', amount: 8600, detail: 'just invested' },
-  { id: '28', name: 'Aaron Diaz', type: 'withdrawn', amount: 4900, detail: 'just withdrew profit' },
-  { id: '29', name: 'Ruby Flores', type: 'earned', amount: 1670, detail: 'just earned profit' },
-  { id: '30', name: 'Dylan Miller', type: 'deposited', amount: 3900, detail: 'just deposited funds' },
-];
+const ACTIVITY_FEED: ActivityItem[] = Array.from({ length: 40 }, (_, index) => {
+  const names = [
+    'John Cliff',
+    'Maya Chen',
+    'Ava Brooks',
+    'Daniel Ross',
+    'Liam Stone',
+    'Sophia Lane',
+    'Noah Price',
+    'Emma Ford',
+    'Olivia Reed',
+    'Mason Cole',
+    'Isabella King',
+    'Ethan Cruz',
+    'Charlotte Bell',
+    'James Walker',
+    'Amelia Scott',
+    'Ben Carter',
+    'Grace Turner',
+    'Lucas Brooks',
+    'Nora Hughes',
+    'Owen Parker',
+    'Zara Mitchell',
+    'Caleb Foster',
+    'Hannah Reed',
+    'Leo Adams',
+    'Ivy Collins',
+    'Nathan Brooks',
+    'Sophie Bennett',
+    'Aaron Diaz',
+    'Ruby Flores',
+    'Dylan Miller',
+    'Mia Turner',
+    'Julian Park',
+    'Elena Cruz',
+    'Harper Reed',
+    'Theo Brooks',
+    'Chloe Mason',
+    'Luca Bennett',
+    'Piper Ward',
+    'Kai Summers',
+    'Aria Foster',
+  ];
+
+  const types: ActivityType[] = ['invested', 'deposited', 'withdrawn', 'earned'];
+  const type = types[index % types.length];
+  const detail =
+    type === 'withdrawn'
+      ? 'just withdrew profit'
+      : type === 'deposited'
+        ? 'just deposited funds'
+        : type === 'earned'
+          ? 'just earned profit'
+          : 'just invested';
+
+  const amountBase = [1200, 2800, 5400, 9800, 14600, 22500, 34000, 48000, 72000, 100000][index % 10];
+  const amount = amountBase + (index % 4) * 1200;
+
+  return {
+    id: `${index + 1}`,
+    name: names[index % names.length],
+    type,
+    amount,
+    detail,
+  };
+});
 
 const currencyFormatter = new Intl.NumberFormat('en-US', {
   style: 'currency',
@@ -83,8 +117,7 @@ function getActionIcon(type: ActivityType) {
 export default function LiveActivityNotifications() {
   const [toast, setToast] = useState<ActivityItem | null>(null);
   const [cursor, setCursor] = useState(0);
-
-  const featuredFeed = useMemo(() => ACTIVITY_FEED.slice(0, 10), []);
+  const [featuredFeed, setFeaturedFeed] = useState<ActivityItem[]>(() => ACTIVITY_FEED.slice(0, 8));
 
   useEffect(() => {
     let timeoutId: ReturnType<typeof window.setTimeout>;
@@ -97,6 +130,12 @@ export default function LiveActivityNotifications() {
         setToast(nextActivity);
         clearTimeout(timeoutId);
         timeoutId = window.setTimeout(() => setToast(null), 2800);
+
+        const start = nextIndex;
+        const nextFeed = ACTIVITY_FEED.slice(start, start + 8).concat(
+          start + 8 > ACTIVITY_FEED.length ? ACTIVITY_FEED.slice(0, (start + 8) % ACTIVITY_FEED.length) : [],
+        );
+        setFeaturedFeed(nextFeed);
 
         return nextIndex;
       });
