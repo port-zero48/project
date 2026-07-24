@@ -160,8 +160,8 @@ const StocksNewsWidget = () => {
     };
 
     fetchNews();
-    // Refresh news every 5 minutes
-    const interval = setInterval(fetchNews, 300000);
+    // Refresh news every minute for a more live stock news experience
+    const interval = setInterval(fetchNews, 60000);
     return () => clearInterval(interval);
   }, []);
 

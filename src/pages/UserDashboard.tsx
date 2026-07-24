@@ -12,6 +12,7 @@ import TransactionHistory from '../components/dashboard/TransactionHistory';
 import DepositNotification from '../components/dashboard/DepositNotification';
 import ActiveInvestments from '../components/dashboard/ActiveInvestments';
 import LiveActivityNotifications from '../components/dashboard/LiveActivityNotifications';
+import LiveInvestorList from '../components/dashboard/LiveInvestorList';
 import { ErrorBoundary } from '../components/ErrorBoundary';
 import { useState } from 'react';
 import { X } from 'lucide-react';
@@ -59,6 +60,7 @@ export default function UserDashboard() {
                     <TradingChat />
                   </div>
                   <LiveActivityNotifications />
+                  <LiveInvestorList />
                 </>
               ) : (
                 <div className="relative min-h-[calc(100vh-10rem)] rounded-2xl border border-gray-800 bg-gray-900/90 p-3 sm:p-5 shadow-2xl">

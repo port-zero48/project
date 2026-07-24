@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ArrowUpRight, Sparkles, TrendingUp, Wallet } from 'lucide-react';
 
 type ActivityType = 'invested' | 'withdrawn' | 'deposited' | 'earned';
@@ -81,82 +81,68 @@ function getActionIcon(type: ActivityType) {
 }
 
 export default function LiveActivityNotifications() {
-  const [toasts, setToasts] = useState<(ActivityItem & { id: string })[]>([]);
+  const [activeToast, setActiveToast] = useState<ActivityItem | null>(null);
   const [cursor, setCursor] = useState(0);
 
-  const featuredFeed = useMemo(() => ACTIVITY_FEED.slice(0, 10), []);
-
   useEffect(() => {
-    const interval = window.setInterval(() => {
+    const showNextToast = () => {
       setCursor((prev) => {
         const nextIndex = (prev + 1) % ACTIVITY_FEED.length;
         const nextActivity = ACTIVITY_FEED[nextIndex];
+        const variance = (prev % 5) + 1;
+        const adjustedAmount = Math.round(nextActivity.amount * (1 + variance * 0.04));
+        const variedActivity = {
+          ...nextActivity,
+          amount: adjustedAmount,
+          name: `${nextActivity.name.split(' ')[0]} ${nextActivity.name.split(' ')[1]}`,
+          detail: nextActivity.type === 'earned'
+            ? 'just earned profit'
+            : nextActivity.type === 'invested'
+              ? 'just invested'
+              : nextActivity.type === 'withdrawn'
+                ? 'just withdrew profit'
+                : 'just deposited funds',
+        };
 
-        setToasts((current) => [
-          {
-            ...nextActivity,
-            id: `${nextActivity.id}-${Date.now()}`,
-          },
-          ...current,
-        ].slice(0, 4));
-
+        setActiveToast(variedActivity);
         return nextIndex;
       });
-    }, 3200);
+    };
 
+    showNextToast();
+
+    const interval = window.setInterval(showNextToast, 3200);
     return () => window.clearInterval(interval);
   }, []);
 
+  useEffect(() => {
+    if (!activeToast) return;
+
+    const timeout = window.setTimeout(() => {
+      setActiveToast(null);
+    }, 2400);
+
+    return () => window.clearTimeout(timeout);
+  }, [activeToast]);
+
+  if (!activeToast) return null;
+
   return (
-    <div className="relative">
-      <div className="pointer-events-none fixed inset-x-3 top-3 z-40 flex max-w-full flex-col gap-1.5 sm:top-20 sm:right-6 sm:left-auto sm:w-[min(92vw,24rem)] sm:gap-2">
-        {toasts.slice(0, 2).map((toast) => (
-          <div
-            key={toast.id}
-            className="rounded-xl border border-emerald-500/20 bg-black/70 p-2.5 shadow-none backdrop-blur-sm sm:p-3"
-          >
-            <div className="flex items-start gap-2">
-              <div className="mt-0.5 rounded-full bg-emerald-500/10 p-1.5">
-                {getActionIcon(toast.type)}
-              </div>
-              <div className="min-w-0 flex-1">
-                <p className="truncate text-[13px] font-semibold text-white sm:text-sm">
-                  {toast.name} {getActionLabel(toast.type)}
-                </p>
-                <p className="text-xs text-emerald-300 sm:text-sm">
-                  {currencyFormatter.format(toast.amount)}
-                </p>
-                <p className="truncate text-[11px] text-gray-400 sm:text-xs">{toast.detail}</p>
-              </div>
-            </div>
+    <div className="pointer-events-none fixed right-2 top-16 z-50 max-w-[78vw] sm:right-4 sm:top-20 sm:max-w-[18rem]">
+      <div className="rounded-2xl border border-white/25 bg-white/20 p-2.5 shadow-[0_10px_30px_rgba(0,0,0,0.16)] backdrop-blur-md sm:p-3">
+        <div className="flex items-start gap-2">
+          <div className="mt-0.5 rounded-full bg-emerald-500/15 p-1.5">
+            {getActionIcon(activeToast.type)}
           </div>
-        ))}
-      </div>
-
-      <div className="rounded-2xl border border-transparent bg-transparent p-3 shadow-none sm:p-4">
-        <div className="mb-2 flex items-center justify-between gap-2 sm:mb-3">
-          <div className="flex items-center gap-2">
-            <Sparkles className="h-4 w-4 text-amber-400 sm:h-5 sm:w-5" />
-            <h3 className="text-sm font-semibold text-white sm:text-base">Live Investor Activity</h3>
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-[13px] font-semibold text-slate-900 sm:text-sm">
+              {activeToast.name} {getActionLabel(activeToast.type)}
+            </p>
+            <p className="text-xs text-emerald-700 sm:text-sm">
+              {currencyFormatter.format(activeToast.amount)}
+            </p>
+            <p className="truncate text-[11px] text-slate-700 sm:text-xs">{activeToast.detail}</p>
           </div>
-          <span className="rounded-full bg-emerald-500/10 px-2 py-1 text-[10px] font-medium text-emerald-300 sm:px-2.5 sm:text-xs">
-            Motivating the room
-          </span>
-        </div>
-
-        <div className="space-y-1.5 sm:space-y-2">
-          {featuredFeed.map((item) => (
-            <div key={item.id} className="flex items-center justify-between rounded-lg border border-white/10 bg-transparent px-2.5 py-2 sm:px-3">
-              <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-medium text-white">{item.name}</p>
-                <p className="truncate text-[11px] text-gray-400 sm:text-xs">{item.detail}</p>
-              </div>
-              <div className="ml-2 text-right">
-                <p className="text-sm font-semibold text-emerald-300">{currencyFormatter.format(item.amount)}</p>
-                <p className="text-[10px] uppercase tracking-wide text-gray-500 sm:text-[11px]">{getActionLabel(item.type)}</p>
-              </div>
-            </div>
-          ))}
         </div>
       </div>
     </div>
