@@ -109,24 +109,24 @@ export default function LiveActivityNotifications() {
 
   return (
     <div className="relative">
-      <div className="pointer-events-none fixed right-3 top-20 z-40 flex w-[min(92vw,24rem)] flex-col gap-2 sm:right-6">
-        {toasts.map((toast) => (
+      <div className="pointer-events-none fixed inset-x-3 top-3 z-40 flex max-w-full flex-col gap-1.5 sm:top-20 sm:right-6 sm:left-auto sm:w-[min(92vw,24rem)] sm:gap-2">
+        {toasts.slice(0, 2).map((toast) => (
           <div
             key={toast.id}
-            className="rounded-xl border border-emerald-500/20 bg-transparent p-3 shadow-none backdrop-blur-none"
+            className="rounded-xl border border-emerald-500/20 bg-black/70 p-2.5 shadow-none backdrop-blur-sm sm:p-3"
           >
             <div className="flex items-start gap-2">
               <div className="mt-0.5 rounded-full bg-emerald-500/10 p-1.5">
                 {getActionIcon(toast.type)}
               </div>
-              <div>
-                <p className="text-sm font-semibold text-white">
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-[13px] font-semibold text-white sm:text-sm">
                   {toast.name} {getActionLabel(toast.type)}
                 </p>
-                <p className="text-sm text-emerald-300">
+                <p className="text-xs text-emerald-300 sm:text-sm">
                   {currencyFormatter.format(toast.amount)}
                 </p>
-                <p className="text-xs text-gray-400">{toast.detail}</p>
+                <p className="truncate text-[11px] text-gray-400 sm:text-xs">{toast.detail}</p>
               </div>
             </div>
           </div>
