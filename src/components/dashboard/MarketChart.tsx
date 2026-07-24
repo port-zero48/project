@@ -31,12 +31,12 @@ const timeframes = {
   '1d': { interval: '1d', ms: 86400000 }
 };
 
-const createFallbackCandleData = (count = 100): CandlePoint[] => {
+const createFallbackCandleData = (count = 100, basePrice = 1000): CandlePoint[] => {
   const candles: CandlePoint[] = [];
-  let lastClose = 1000;
+  let lastClose = basePrice;
 
   for (let i = 0; i < count; i += 1) {
-    const drift = Math.sin(i / 3) * 8 + Math.cos(i / 6) * 4;
+    const drift = Math.sin(i / 3) * (basePrice * 0.008) + Math.cos(i / 6) * (basePrice * 0.004);
     const open = lastClose;
     const close = Math.max(1, open + drift);
     const high = Math.max(open, close) + Math.abs(drift) * 0.4;
@@ -82,6 +82,19 @@ const fetchBinanceKlines = async (symbol: string, interval: string, limit = 100)
   }
 };
 
+const fetchBinancePrice = async (symbol: string): Promise<number | null> => {
+  try {
+    const response = await fetch(`https://api.binance.com/api/v3/ticker/price?symbol=${symbol}`);
+    if (!response.ok) throw new Error('Binance ticker fetch failed');
+
+    const json = await response.json();
+    return Number(json.price);
+  } catch (error) {
+    console.error('Error fetching Binance price:', error);
+    return null;
+  }
+};
+
 export default function TradingChart() {
   const [currentPair, setCurrentPair] = useState('BTC/USD');
   const [currentPrice, setCurrentPrice] = useState(0);
@@ -91,6 +104,7 @@ export default function TradingChart() {
   const [loading, setLoading] = useState(true);
   const [wsStatus, setWsStatus] = useState('connecting');
   const [initialOpen, setInitialOpen] = useState(0);
+  const [useFallbackData, setUseFallbackData] = useState(false);
   const chartContainerRef = useRef<HTMLDivElement | null>(null);
   const chartRef = useRef<IChartApi | null>(null);
   const candleSeriesRef = useRef<ISeriesApi<'Candlestick'> | null>(null);
@@ -162,9 +176,18 @@ export default function TradingChart() {
       setWsStatus('connecting');
 
       const candles = await fetchBinanceKlines(selectedPair.symbol, chartInterval, 100);
-      const finalCandles = candles.length > 0 ? candles : createFallbackCandleData(100);
+      const hasCandles = candles.length > 0;
+      const fallbackBase = await fetchBinancePrice(selectedPair.symbol) ?? 1000;
+      const finalCandles = hasCandles ? candles : createFallbackCandleData(100, fallbackBase);
 
       if (!isMounted) return;
+
+      setUseFallbackData(!hasCandles);
+      setWsStatus(hasCandles ? 'connected' : 'error');
+
+      const latestPrice = hasCandles
+        ? finalCandles[finalCandles.length - 1].close
+        : fallbackBase;
 
       const formatted = finalCandles.map((candle) => ({
         time: candle.time,
@@ -175,10 +198,9 @@ export default function TradingChart() {
       })) as CandlestickData[];
 
       candleSeriesRef.current?.setData(formatted);
-      setCurrentPrice(finalCandles[finalCandles.length - 1].close);
+      setCurrentPrice(latestPrice);
       setInitialOpen(finalCandles[0].open);
-      setPriceChange(finalCandles[finalCandles.length - 1].close - finalCandles[0].open);
-      setWsStatus('connected');
+      setPriceChange(hasCandles ? latestPrice - finalCandles[0].open : 0);
       setLoading(false);
     };
 
@@ -214,7 +236,9 @@ export default function TradingChart() {
 
         candleSeriesRef.current?.update(updatedBar);
         setCurrentPrice(Number(kline.c));
-        setPriceChange(Number(kline.c) - initialOpen);
+        if (!useFallbackData) {
+          setPriceChange(Number(kline.c) - initialOpen);
+        }
       } catch (error) {
         console.error('Binance websocket message error:', error);
       }
@@ -233,7 +257,30 @@ export default function TradingChart() {
     return () => {
       ws.close();
     };
-  }, [selectedPair.symbol, chartInterval, initialOpen]);
+  }, [selectedPair.symbol, chartInterval, initialOpen, useFallbackData]);
+
+  useEffect(() => {
+    let intervalId: number | null = null;
+
+    const updatePrice = async () => {
+      const latestPrice = await fetchBinancePrice(selectedPair.symbol);
+      if (latestPrice !== null) {
+        setCurrentPrice(latestPrice);
+        if (!useFallbackData && initialOpen > 0) {
+          setPriceChange(latestPrice - initialOpen);
+        }
+      }
+    };
+
+    updatePrice();
+    intervalId = window.setInterval(updatePrice, 5000);
+
+    return () => {
+      if (intervalId !== null) {
+        window.clearInterval(intervalId);
+      }
+    };
+  }, [selectedPair.symbol, initialOpen, useFallbackData]);
 
   const isPositive = priceChange >= 0;
   const percentChange = initialOpen > 0 ? ((priceChange / initialOpen) * 100).toFixed(2) : '0.00';
@@ -292,6 +339,11 @@ export default function TradingChart() {
                 {wsStatus === 'connected' ? 'LIVE' : wsStatus === 'error' ? 'Connection Error' : 'Connecting...'}
               </span>
             </div>
+            {useFallbackData && (
+              <div className="mt-2 px-3 py-2 rounded bg-yellow-500/10 border border-yellow-500 text-yellow-200 text-sm">
+                Using fallback candle data. Live price may still update, but candle history is not from Binance.
+              </div>
+            )}
           </div>
 
           <div className="flex items-center gap-4">
