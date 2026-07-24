@@ -81,56 +81,54 @@ function getActionIcon(type: ActivityType) {
 }
 
 export default function LiveActivityNotifications() {
-  const [toasts, setToasts] = useState<(ActivityItem & { id: string })[]>([]);
+  const [toast, setToast] = useState<ActivityItem | null>(null);
   const [cursor, setCursor] = useState(0);
 
   const featuredFeed = useMemo(() => ACTIVITY_FEED.slice(0, 10), []);
 
   useEffect(() => {
+    let timeoutId: ReturnType<typeof window.setTimeout>;
+
     const interval = window.setInterval(() => {
       setCursor((prev) => {
         const nextIndex = (prev + 1) % ACTIVITY_FEED.length;
         const nextActivity = ACTIVITY_FEED[nextIndex];
 
-        setToasts((current) => [
-          {
-            ...nextActivity,
-            id: `${nextActivity.id}-${Date.now()}`,
-          },
-          ...current,
-        ].slice(0, 4));
+        setToast(nextActivity);
+        clearTimeout(timeoutId);
+        timeoutId = window.setTimeout(() => setToast(null), 2800);
 
         return nextIndex;
       });
     }, 3200);
 
-    return () => window.clearInterval(interval);
+    return () => {
+      window.clearInterval(interval);
+      clearTimeout(timeoutId);
+    };
   }, []);
 
   return (
     <div className="relative">
-      <div className="pointer-events-none fixed right-3 top-20 z-40 flex w-[min(92vw,24rem)] flex-col gap-2 sm:right-6">
-        {toasts.map((toast) => (
-          <div
-            key={toast.id}
-            className="rounded-xl border border-slate-700/80 bg-slate-950/95 px-4 py-3 shadow-xl shadow-slate-950/40 backdrop-blur-sm"
-          >
+      <div className="pointer-events-none fixed right-3 top-20 z-40 flex w-[min(90vw,20rem)] flex-col gap-2 sm:right-6">
+        {toast && (
+          <div className="max-w-[20rem] rounded-xl border border-slate-700/80 bg-slate-950/95 px-4 py-3 shadow-xl shadow-slate-950/40 backdrop-blur-sm">
             <div className="flex items-start gap-3">
               <div className="mt-0.5 rounded-full bg-slate-800 p-2 text-slate-100">
                 {getActionIcon(toast.type)}
               </div>
               <div>
-                <p className="text-sm font-semibold text-white">
+                <p className="text-sm font-bold text-white">
                   {toast.name} {getActionLabel(toast.type)}
                 </p>
-                <p className="text-sm font-semibold text-emerald-300">
+                <p className="text-sm font-bold text-emerald-300">
                   {currencyFormatter.format(toast.amount)}
                 </p>
-                <p className="text-xs text-slate-300">{toast.detail}</p>
+                <p className="text-xs font-semibold text-slate-300">{toast.detail}</p>
               </div>
             </div>
           </div>
-        ))}
+        )}
       </div>
 
       <div className="rounded-2xl border border-transparent bg-transparent p-3 shadow-none sm:p-4">
