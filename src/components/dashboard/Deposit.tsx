@@ -14,7 +14,7 @@ export default function Deposit({ onClose }: DepositProps) {
 
   if (!method) {
     return (
-      <div className="bg-gray-800 rounded-xl p-6 h-[600px] flex flex-col">
+      <div className="bg-gray-800 rounded-xl p-6 min-h-[calc(100vh-10rem)] flex flex-col">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-2xl font-bold text-white">Deposit Funds</h2>
           {onClose && (
@@ -78,7 +78,7 @@ export default function Deposit({ onClose }: DepositProps) {
   }
 
   return (
-    <div className="bg-gray-800 rounded-xl p-6 h-[600px] overflow-y-auto">
+    <div className="bg-gray-800 rounded-xl p-6 min-h-[calc(100vh-10rem)] overflow-y-auto">
       <div className="flex items-center justify-between mb-6">
         <button
           onClick={() => setMethod(null)}

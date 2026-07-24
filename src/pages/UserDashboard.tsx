@@ -11,6 +11,7 @@ import InvestmentPlan from '../components/dashboard/InvestmentPlan';
 import TransactionHistory from '../components/dashboard/TransactionHistory';
 import DepositNotification from '../components/dashboard/DepositNotification';
 import ActiveInvestments from '../components/dashboard/ActiveInvestments';
+import LiveActivityNotifications from '../components/dashboard/LiveActivityNotifications';
 import { ErrorBoundary } from '../components/ErrorBoundary';
 import { useState } from 'react';
 import { X } from 'lucide-react';
@@ -28,7 +29,7 @@ export default function UserDashboard() {
         onSupport={() => setActiveView('support')}
         onBalance={() => setActiveView('balance')}
       />
-      <DepositNotification user={user} />
+      {activeView === null && <DepositNotification user={user} />}
       
       <div className="flex flex-1 overflow-hidden">
         <Sidebar 
@@ -45,24 +46,22 @@ export default function UserDashboard() {
         <main className="flex-1 overflow-y-auto">
           <div className="w-full max-w-full px-3 sm:px-4 md:px-6 py-4 sm:py-6">
             <div className="space-y-4 sm:space-y-6">
-              {/* Show balance cards only when balance view is active or no view is active */}
-              {(activeView === null || activeView === 'balance') && (
-                <BalanceCard user={user} />
-              )}
-              
-              {/* Active Investments - Show returns earning */}
-              <ActiveInvestments user={user} />
-              
-              {/* Market Chart - Full Width */}
-              <div className="w-full h-140 sm:h-96 md:h-[500px]">
-                <ErrorBoundary>
-                  <MarketChart />
-                </ErrorBoundary>
-              </div>
-              
-              {/* Main content area - shows different views based on activeView */}
-              {activeView === 'trading' && (
-                <div className="relative">
+              {activeView === null ? (
+                <>
+                  <BalanceCard user={user} />
+                  <ActiveInvestments user={user} />
+                  <div className="w-full h-140 sm:h-96 md:h-[500px]">
+                    <ErrorBoundary>
+                      <MarketChart />
+                    </ErrorBoundary>
+                  </div>
+                  <div className="relative rounded-2xl border border-gray-800 bg-gray-900/80 p-3 sm:p-5 shadow-2xl">
+                    <TradingChat />
+                  </div>
+                  <LiveActivityNotifications />
+                </>
+              ) : (
+                <div className="relative min-h-[calc(100vh-10rem)] rounded-2xl border border-gray-800 bg-gray-900/90 p-3 sm:p-5 shadow-2xl">
                   <button
                     onClick={() => setActiveView(null)}
                     className="absolute top-4 right-4 z-10 p-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors"
@@ -70,91 +69,14 @@ export default function UserDashboard() {
                   >
                     <X className="h-5 w-5" />
                   </button>
-                  <TradingChat />
-                </div>
-              )}
 
-              {/* Support View */}
-              {activeView === 'support' && (
-                <div className="relative">
-                  <button
-                    onClick={() => setActiveView(null)}
-                    className="absolute top-4 right-4 z-10 p-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors"
-                    title="Close"
-                  >
-                    <X className="h-5 w-5" />
-                  </button>
-                  <SupportChat />
-                </div>
-              )}
-
-              {/* Balance View with Withdraw/Deposit */}
-              {activeView === 'balance' && (
-                <div className="relative">
-                  <button
-                    onClick={() => setActiveView(null)}
-                    className="absolute top-4 right-4 z-10 p-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors"
-                    title="Close"
-                  >
-                    <X className="h-5 w-5" />
-                  </button>
-                  <WithdrawDeposit user={user} />
-                </div>
-              )}
-
-              {/* Deposit View */}
-              {activeView === 'deposit' && (
-                <div className="relative">
-                  <Deposit onClose={() => setActiveView(null)} />
-                </div>
-              )}
-
-              {/* Withdraw View */}
-              {activeView === 'withdraw' && (
-                <div className="relative">
-                  <button
-                    onClick={() => setActiveView(null)}
-                    className="absolute top-4 right-4 z-10 p-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors"
-                    title="Close"
-                  >
-                    <X className="h-5 w-5" />
-                  </button>
-                  <WithdrawDeposit user={user} />
-                </div>
-              )}
-
-              {/* Investment Plans View */}
-              {activeView === 'investment' && (
-                <div className="relative">
-                  <button
-                    onClick={() => setActiveView(null)}
-                    className="absolute top-4 right-4 z-10 p-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors"
-                    title="Close"
-                  >
-                    <X className="h-5 w-5" />
-                  </button>
-                  <InvestmentPlan user={user} onClose={() => setActiveView(null)} />
-                </div>
-              )}
-
-              {/* Transaction History View */}
-              {activeView === 'history' && (
-                <div className="relative">
-                  <button
-                    onClick={() => setActiveView(null)}
-                    className="absolute top-4 right-4 z-10 p-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors"
-                    title="Close"
-                  >
-                    <X className="h-5 w-5" />
-                  </button>
-                  <TransactionHistory />
-                </div>
-              )}
-
-              {/* Default view - show trading placeholder */}
-              {activeView === null && (
-                <div className="relative">
-                  <TradingChat />
+                  {activeView === 'trading' && <TradingChat />}
+                  {activeView === 'support' && <SupportChat />}
+                  {activeView === 'balance' && <WithdrawDeposit user={user} />}
+                  {activeView === 'deposit' && <Deposit onClose={() => setActiveView(null)} />}
+                  {activeView === 'withdraw' && <WithdrawDeposit user={user} />}
+                  {activeView === 'investment' && <InvestmentPlan user={user} onClose={() => setActiveView(null)} />}
+                  {activeView === 'history' && <TransactionHistory />}
                 </div>
               )}
             </div>

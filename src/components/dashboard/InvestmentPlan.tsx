@@ -159,50 +159,36 @@ export default function InvestmentPlan({
 
   if (totalBalance < PLAN_TIERS[0].minAmount) {
     return (
-      <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-        <div className="bg-gray-800 rounded-xl p-8 max-w-md w-full mx-4">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold text-white">Investment Plans</h2>
-            <button
-              onClick={onClose}
-              className="p-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors"
-            >
-              <X className="h-5 w-5" />
-            </button>
-          </div>
+      <div className="w-full">
+        <div className="mb-6">
+          <h2 className="text-2xl font-bold text-white">Investment Plans</h2>
+          <p className="text-gray-400 text-sm mt-2">
+            Total Balance: <span className="text-green-400 font-semibold">${totalBalance.toFixed(2)}</span>
+          </p>
+        </div>
 
-          <div className="bg-red-500/10 border border-red-500 rounded-lg p-4 text-center">
-            <p className="text-red-400 font-semibold mb-2">Insufficient Funds</p>
-            <p className="text-gray-300 text-sm">
-              Your total balance (${totalBalance.toFixed(2)}) is below the minimum
-              required amount (${PLAN_TIERS[0].minAmount.toFixed(2)}) to invest.
-            </p>
-            <p className="text-gray-400 text-xs mt-3">
-              Deposit more funds to start investing.
-            </p>
-          </div>
+        <div className="bg-red-500/10 border border-red-500 rounded-lg p-4 text-center">
+          <p className="text-red-400 font-semibold mb-2">Insufficient Funds</p>
+          <p className="text-gray-300 text-sm">
+            Your total balance (${totalBalance.toFixed(2)}) is below the minimum
+            required amount (${PLAN_TIERS[0].minAmount.toFixed(2)}) to invest.
+          </p>
+          <p className="text-gray-400 text-xs mt-3">
+            Deposit more funds to start investing.
+          </p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div className="bg-gray-800 rounded-xl p-8 max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h2 className="text-2xl font-bold text-white">Investment Plans</h2>
-            <p className="text-gray-400 text-sm mt-2">
-              Total Balance: <span className="text-green-400 font-semibold">${totalBalance.toFixed(2)}</span>
-            </p>
-          </div>
-          <button
-            onClick={onClose}
-            className="p-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors"
-          >
-            <X className="h-5 w-5" />
-          </button>
-        </div>
+    <div className="w-full">
+      <div className="mb-6">
+        <h2 className="text-2xl font-bold text-white">Investment Plans</h2>
+        <p className="text-gray-400 text-sm mt-2">
+          Total Balance: <span className="text-green-400 font-semibold">${totalBalance.toFixed(2)}</span>
+        </p>
+      </div>
 
         {eligiblePlans.length > 0 && (
           <div className="mb-6">
@@ -258,33 +244,30 @@ export default function InvestmentPlan({
             </p>
           </div>
         )}
-      </div>
 
-      {/* Success Notification */}
+        {/* Success Notification */}
       {showSuccess && successData && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-green-900/90 border-2 border-green-500 rounded-xl p-8 max-w-md w-full mx-4 text-center">
-            <div className="mb-4">
-              <CheckCircle className="h-16 w-16 text-green-400 mx-auto" />
-            </div>
-            <h2 className="text-2xl font-bold text-green-400 mb-2">Plan Activated! 🎉</h2>
-            <p className="text-gray-100 mb-4">
-              Your <span className="font-bold text-green-400">${successData.amount.toFixed(2)}</span> is now invested in the
-            </p>
-            <p className="text-xl font-bold text-green-300 mb-6">{successData.planName} Plan</p>
-            
-            <div className="bg-green-800/50 rounded-lg p-4 mb-6">
-              <div className="flex items-center justify-center space-x-2 mb-2">
-                <TrendingUp className="h-5 w-5 text-green-400" />
-                <span className="text-green-100">Daily Earnings:</span>
-              </div>
-              <p className="text-3xl font-bold text-green-400">${successData.dailyReturn.toFixed(2)}</p>
-            </div>
-
-            <p className="text-sm text-gray-300">
-              Returns are credited immediately. Check your Active Investments section.
-            </p>
+        <div className="mt-6 rounded-xl border border-green-500/40 bg-green-900/30 p-6 text-center">
+          <div className="mb-4">
+            <CheckCircle className="h-16 w-16 text-green-400 mx-auto" />
           </div>
+          <h2 className="text-2xl font-bold text-green-400 mb-2">Plan Activated! 🎉</h2>
+          <p className="text-gray-100 mb-4">
+            Your <span className="font-bold text-green-400">${successData.amount.toFixed(2)}</span> is now invested in the
+          </p>
+          <p className="text-xl font-bold text-green-300 mb-6">{successData.planName} Plan</p>
+          
+          <div className="bg-green-800/50 rounded-lg p-4 mb-6">
+            <div className="flex items-center justify-center space-x-2 mb-2">
+              <TrendingUp className="h-5 w-5 text-green-400" />
+              <span className="text-green-100">Daily Earnings:</span>
+            </div>
+            <p className="text-3xl font-bold text-green-400">${successData.dailyReturn.toFixed(2)}</p>
+          </div>
+
+          <p className="text-sm text-gray-300">
+            Returns are credited immediately. Check your Active Investments section.
+          </p>
         </div>
       )}
     </div>
