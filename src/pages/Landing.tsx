@@ -1,6 +1,9 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
-import { TrendingUp, BarChart3, Shield, Users, Globe, Award, ArrowRight, Sparkles, CheckCircle2 } from 'lucide-react'
+import { TrendingUp, BarChart3, Shield, Users, Globe, Award, ArrowRight, Sparkles, CheckCircle2, ArrowUpRight, Wallet } from 'lucide-react'
+
+type AuthMode = 'login' | 'signup'
+type ActivityType = 'invested' | 'withdrawn' | 'deposited' | 'earned'
 
 interface StockData {
   symbol: string;
@@ -9,11 +12,144 @@ interface StockData {
   changePercent: number;
 }
 
+interface ActivityItem {
+  id: number;
+  name: string;
+  type: ActivityType;
+  amount: number;
+  detail: string;
+}
+
+const ACTIVITY_FEED: ActivityItem[] = Array.from({ length: 20 }, (_, index) => {
+  const names = [
+    'John Cliff',
+    'Maya Chen',
+    'Ava Brooks',
+    'Daniel Ross',
+    'Liam Stone',
+    'Sophia Lane',
+    'Noah Price',
+    'Emma Ford',
+    'Olivia Reed',
+    'Mason Cole',
+  ];
+
+  const types: ActivityType[] = ['invested', 'deposited', 'withdrawn', 'earned'];
+  const type = types[index % types.length];
+  const detail =
+    type === 'withdrawn'
+      ? 'just withdrew profit'
+      : type === 'deposited'
+        ? 'just deposited funds'
+        : type === 'earned'
+          ? 'just earned profit'
+          : 'just invested';
+
+  const amountBase = [1200, 2800, 5400, 9800, 14600, 22500, 34000, 48000, 72000, 100000][index % 10];
+  const amount = amountBase + (index % 4) * 1200;
+
+  return {
+    id: index + 1,
+    name: names[index % names.length],
+    type,
+    amount,
+    detail,
+  };
+});
+
 export default function Landing() {
   const [marketData, setMarketData] = useState<StockData[]>([]);
   const [loading, setLoading] = useState(true);
+  const [notification, setNotification] = useState<ActivityItem | null>(null);
+  const [authLoading, setAuthLoading] = useState<AuthMode | null>(null);
+
+  const redirectTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const notificationTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const stockSymbols = ['AAPL', 'GOOGL', 'MSFT', 'TSLA', 'AMZN', 'NVDA'];
+
+  const currencyFormatter = new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+    maximumFractionDigits: 0,
+  });
+
+  const getActionLabel = (type: ActivityType) => {
+    switch (type) {
+      case 'invested':
+        return 'invested';
+      case 'withdrawn':
+        return 'withdrew profit';
+      case 'deposited':
+        return 'deposited';
+      case 'earned':
+        return 'earned';
+      default:
+        return 'updated';
+    }
+  };
+
+  const getActionIcon = (type: ActivityType) => {
+    switch (type) {
+      case 'invested':
+        return <TrendingUp className="h-4 w-4 text-blue-400" />;
+      case 'withdrawn':
+        return <Wallet className="h-4 w-4 text-red-400" />;
+      case 'deposited':
+        return <ArrowUpRight className="h-4 w-4 text-green-400" />;
+      case 'earned':
+        return <Sparkles className="h-4 w-4 text-amber-400" />;
+      default:
+        return <Sparkles className="h-4 w-4 text-blue-400" />;
+    }
+  };
+
+  const handleAuthAction = (mode: AuthMode) => {
+    if (authLoading || redirectTimerRef.current) {
+      return;
+    }
+
+    if (redirectTimerRef.current) {
+      window.clearTimeout(redirectTimerRef.current);
+    }
+
+    setAuthLoading(mode);
+
+    redirectTimerRef.current = window.setTimeout(() => {
+      window.location.assign(`/auth?mode=${mode}`);
+    }, 1800);
+  };
+
+  useEffect(() => {
+    let activityIndex = 0;
+    const showNextActivity = () => {
+      const nextActivity = ACTIVITY_FEED[activityIndex];
+      setNotification(nextActivity);
+
+      if (notificationTimerRef.current) {
+        window.clearTimeout(notificationTimerRef.current);
+      }
+
+      notificationTimerRef.current = window.setTimeout(() => {
+        setNotification(null);
+      }, 3200);
+
+      activityIndex = (activityIndex + 1) % ACTIVITY_FEED.length;
+    };
+
+    showNextActivity();
+    const interval = window.setInterval(showNextActivity, 3600);
+
+    return () => {
+      window.clearInterval(interval);
+      if (redirectTimerRef.current) {
+        window.clearTimeout(redirectTimerRef.current);
+      }
+      if (notificationTimerRef.current) {
+        window.clearTimeout(notificationTimerRef.current);
+      }
+    };
+  }, []);
 
   // Fetch real market data like in TradingChart.tsx
   const fetchStockData = async (ticker: string) => {
@@ -91,6 +227,43 @@ export default function Landing() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900">
+      {authLoading && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-950/80 backdrop-blur-sm">
+          <div className="rounded-2xl border border-slate-700/70 bg-slate-900/95 p-8 text-center shadow-2xl shadow-slate-950/40">
+            <div className="mx-auto h-12 w-12 animate-spin rounded-full border-4 border-cyan-500 border-t-transparent" />
+            <p className="mt-4 text-lg font-semibold text-white">
+              {authLoading === 'login' ? 'Signing you in...' : 'Preparing your account...'}
+            </p>
+            <p className="mt-2 text-sm text-slate-400">
+              {authLoading === 'login'
+                ? 'Your dashboard is loading with your latest deposits, earnings, and investments.'
+                : 'We are setting up your secure account for deposits, withdrawals, and investments.'}
+            </p>
+          </div>
+        </div>
+      )}
+
+      {notification && (
+        <div className="pointer-events-none fixed right-3 top-20 z-[70] flex w-[min(90vw,20rem)] flex-col gap-2 sm:right-6">
+          <div className="max-w-[20rem] rounded-xl border border-slate-700/80 bg-slate-950/95 px-4 py-3 shadow-xl shadow-slate-950/40 backdrop-blur-sm">
+            <div className="flex items-start gap-3">
+              <div className="mt-0.5 rounded-full bg-slate-800 p-2 text-slate-100">
+                {getActionIcon(notification.type)}
+              </div>
+              <div>
+                <p className="text-sm font-bold text-white">
+                  {notification.name} {getActionLabel(notification.type)}
+                </p>
+                <p className="text-sm font-bold text-emerald-300">
+                  {currencyFormatter.format(notification.amount)}
+                </p>
+                <p className="text-xs font-semibold text-slate-300">{notification.detail}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Market Ticker with Right Scrolling Animation */}
       <div className="bg-slate-800/50 backdrop-blur-sm border-b border-slate-700/50 overflow-hidden">
         <style>{`
@@ -155,12 +328,20 @@ export default function Landing() {
         <div className="flex items-center space-x-4">
           <Link
             to="/auth"
+            onClick={(event) => {
+              event.preventDefault();
+              handleAuthAction('login');
+            }}
             className="text-slate-300 hover:text-white transition-colors px-4 py-2"
           >
             Sign In
           </Link>
           <Link
             to="/auth"
+            onClick={(event) => {
+              event.preventDefault();
+              handleAuthAction('signup');
+            }}
             className="bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white px-6 py-3 rounded-lg font-semibold transition-all duration-200 shadow-lg hover:shadow-xl"
           >
             Get Started
@@ -191,6 +372,10 @@ export default function Landing() {
               <div className="mt-8 flex flex-col justify-center gap-4 sm:flex-row lg:justify-start">
                 <Link
                   to="/auth"
+                  onClick={(event) => {
+                    event.preventDefault();
+                    handleAuthAction('signup');
+                  }}
                   className="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-blue-500 to-cyan-500 px-8 py-4 text-lg font-semibold text-white shadow-lg shadow-cyan-500/20 transition-all duration-200 hover:from-blue-600 hover:to-cyan-600"
                 >
                   <span>Start Trading Now</span>
@@ -198,6 +383,10 @@ export default function Landing() {
                 </Link>
                 <Link
                   to="/auth"
+                  onClick={(event) => {
+                    event.preventDefault();
+                    handleAuthAction('login');
+                  }}
                   className="rounded-xl border border-slate-600 px-8 py-4 text-lg font-semibold text-white transition-all duration-200 hover:border-slate-400 hover:bg-slate-800/60"
                 >
                   Sign in
@@ -378,6 +567,10 @@ export default function Landing() {
           <p className="mx-auto mt-4 max-w-2xl text-xl text-slate-300">Join TradePro today and experience a cleaner, smarter way to follow the markets and act on opportunity.</p>
           <Link
             to="/auth"
+            onClick={(event) => {
+              event.preventDefault();
+              handleAuthAction('signup');
+            }}
             className="mt-8 inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-500 to-cyan-500 px-12 py-4 text-xl font-semibold text-white shadow-lg shadow-cyan-500/20 transition-all duration-200 hover:from-blue-600 hover:to-cyan-600"
           >
             <span>Open Your Account</span>

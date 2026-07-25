@@ -1,14 +1,17 @@
 import { useState } from 'react';
-import { useAuth } from '../../context/AuthContext';
 
-export default function SignInForm() {
-  const { signIn, error } = useAuth();
+interface SignInFormProps {
+  onSubmit: (email: string, password: string) => Promise<void>;
+  isSubmitting: boolean;
+}
+
+export default function SignInForm({ onSubmit, isSubmitting }: SignInFormProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    await signIn(email, password);
+    await onSubmit(email, password);
   };
 
   return (
@@ -39,12 +42,12 @@ export default function SignInForm() {
           required
         />
       </div>
-      {error && <p className="text-red-500 text-sm">{error}</p>}
       <button
         type="submit"
-        className="w-full bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-md transition-colors"
+        disabled={isSubmitting}
+        className="w-full bg-blue-500 hover:bg-blue-600 disabled:cursor-not-allowed disabled:bg-blue-400 text-white py-2 px-4 rounded-md transition-colors"
       >
-        Sign In
+        {isSubmitting ? 'Signing In...' : 'Sign In'}
       </button>
     </form>
   );

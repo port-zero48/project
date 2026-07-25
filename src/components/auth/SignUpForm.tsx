@@ -1,8 +1,11 @@
 import { useState } from 'react';
-import { useAuth } from '../../context/AuthContext';
 
-export default function SignUpForm() {
-  const { signUp, error } = useAuth();
+interface SignUpFormProps {
+  onSubmit: (email: string, password: string) => Promise<void>;
+  isSubmitting: boolean;
+}
+
+export default function SignUpForm({ onSubmit, isSubmitting }: SignUpFormProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -15,7 +18,7 @@ export default function SignUpForm() {
       return;
     }
     setPasswordError('');
-    await signUp(email, password);
+    await onSubmit(email, password);
   };
 
   return (
@@ -60,12 +63,12 @@ export default function SignUpForm() {
         />
       </div>
       {passwordError && <p className="text-red-500 text-sm">{passwordError}</p>}
-      {error && <p className="text-red-500 text-sm">{error}</p>}
       <button
         type="submit"
-        className="w-full bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-md transition-colors"
+        disabled={isSubmitting}
+        className="w-full bg-blue-500 hover:bg-blue-600 disabled:cursor-not-allowed disabled:bg-blue-400 text-white py-2 px-4 rounded-md transition-colors"
       >
-        Sign Up
+        {isSubmitting ? 'Creating Account...' : 'Sign Up'}
       </button>
     </form>
   );
